@@ -13,8 +13,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class ServerToClient extends Thread {
-
-	public enum MESSAGE_TYPE {KEY,MESSAGE};
 	
 	/**
 	 * Class variables
