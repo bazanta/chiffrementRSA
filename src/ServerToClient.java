@@ -12,8 +12,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class ServerToClient extends Thread {
-	
+public class ServerToClient extends Thread 
+{
 	/**
 	 * Class variables
 	 */
@@ -27,7 +27,8 @@ public class ServerToClient extends Thread {
 	 * @param se, the Server it belongs to
 	 * @param so, the Socket it communicates with
 	 */
-	public ServerToClient(Socket so) {
+	public ServerToClient(Socket so) 
+	{
 		socket = so;
 		out = null;
 		in = null;
@@ -37,7 +38,8 @@ public class ServerToClient extends Thread {
 	/**
 	 * Runs the ServerToClient
 	 */
-	public void run() {
+	public void run() 
+	{
 		try {
 			out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 			out.flush();
@@ -83,7 +85,8 @@ public class ServerToClient extends Thread {
 	 * @param o,
 	 * @throws IOException
 	 */
-	private void sendMessage(Object o) throws IOException {
+	private void sendMessage(Object o) throws IOException 
+	{
 		out.writeObject(o);
 		out.flush();
 	}

@@ -8,7 +8,8 @@
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server extends Thread {
+public class Server extends Thread 
+{
 
 	/**
 	 * Class variables
@@ -19,14 +20,16 @@ public class Server extends Thread {
 	 * Constructs a Server with the port given in parameters
 	 * @param p, the port of the Server
 	 */
-	public Server(int p) {
+	public Server(int p) 
+	{
 		port = p;
 	}
 	
 	/**
 	 * Runs the Server
 	 */
-	public void run() {
+	public void run() 
+	{
 		/**
 			Création des clés
 		 */
@@ -50,7 +53,8 @@ public class Server extends Thread {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
 		if (args.length >=1) {
 			Server server = new Server(Integer.parseInt(args[0]));
 			server.start();

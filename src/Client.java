@@ -12,8 +12,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-public class Client extends Thread {
-
+public class Client extends Thread 
+{
 	private static int number_of_clients = 0;
 
 	/**
@@ -30,7 +30,8 @@ public class Client extends Thread {
 	 * @param number, the number of the Client
 	 * @param p, the port to connect to
 	 */
-	public Client(int p) {
+	public Client(int p) 
+	{
 		socket = null;
 		out = null;
 		in = null;
@@ -43,7 +44,8 @@ public class Client extends Thread {
 	 * @param port, the port of the server you must connect to
 	 * @throws Exception
 	 */
-	public void connect(int port) throws Exception {
+	public void connect(int port) throws Exception 
+	{
 		System.out.println("CLIENT " + client_name + "\tCONNECT TO " + port);
 		socket = new Socket("localhost", port);
 		out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
@@ -57,7 +59,8 @@ public class Client extends Thread {
 	 * @param o, the Object to send
 	 * @throws IOException
 	 */
-	private void sendMessage(Object o) throws IOException {
+	private void sendMessage(Object o) throws IOException 
+	{
 		out.writeObject(o);
 		out.flush();
 	}
@@ -65,7 +68,8 @@ public class Client extends Thread {
 	/**
 	 * Runs the thread
 	 */
-	public void run() {
+	public void run() 
+	{
 		try {
 			connect(port);
 		
@@ -94,7 +98,8 @@ public class Client extends Thread {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
 		Client server = new Client(20000);
 		server.start();
 	}
