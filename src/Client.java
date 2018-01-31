@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Scanner;
+import java.math.BigInteger;
 
 public class Client extends Thread 
 {
@@ -24,6 +26,8 @@ public class Client extends Thread
 	private Socket socket;
 	private int port;
 	private int client_name;
+	private Keys porteCle;
+	private Key hostKey;
 
 	/**
 	 * Constructs a Client
@@ -37,6 +41,8 @@ public class Client extends Thread
 		in = null;
 		port = p;
 		client_name = ++number_of_clients;
+		porteCle = new Keys();
+		hostKey = null;
 	}
 	
 	/**
@@ -51,7 +57,8 @@ public class Client extends Thread
 		out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		out.flush();
 		in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));		
-		sendMessage("NAME CLIENT-" + client_name);
+		sendMessage(Message.MESSAGE_TYPE.MESSAGE,"NAME CLIENT-" + client_name);
+		sendMessage(Message.MESSAGE_TYPE.KEY, porteCle.getKeyPublic());
 	}
 
 	/**
@@ -59,9 +66,13 @@ public class Client extends Thread
 	 * @param o, the Object to send
 	 * @throws IOException
 	 */
-	private void sendMessage(Object o) throws IOException 
+	private void sendMessage(Message.MESSAGE_TYPE type , Object o) throws IOException 
 	{
-		out.writeObject(o);
+		Message msg = new Message(type,o.toString());
+		if (type == Message.MESSAGE_TYPE.MESSAGE && hostKey != null){
+			msg.encryptMess(hostKey);
+		}
+		out.writeObject(msg);
 		out.flush();
 	}
 
@@ -72,19 +83,25 @@ public class Client extends Thread
 	{
 		try {
 			connect(port);
-		
-			String message;
+			Scanner sc = new Scanner(System.in);
+			Message message;
 			/** Gets the Server input **/
-			while (!(message = (String) in.readObject()).equals("QUIT")) {
-				if (message.equals("WAIT")) {
+			while (!(message = (Message) in.readObject()).equals("QUIT")) {
+				if (message.decryptMess(hostKey).equals("WAIT")) {
 					/** Wait for the server's instruction **/
-				} else if (message.equals("CONNECTED")) {
+				} else if (message.decryptMess(hostKey).equals("CONNECTED")) {
 					System.out.println("CLIENT \tCONNECTED");
-					sendMessage("QUIT");
+					//sendMessage(Message.MESSAGE_TYPE.MESSAGE,"QUIT");
+				} else if (message.getType() == Message.MESSAGE_TYPE.KEY) {
+					String string = message.getMessage();
+					String[] hStrings = string.split(",");
+					hostKey = new Key(new BigInteger(hStrings[0]),new BigInteger(hStrings[1]));
+				} else {
+					sendMessage(Message.MESSAGE_TYPE.MESSAGE,sc.nextLine());
 				}
 			}
 			System.out.println("CLIENT " + client_name + "\tQUIT");
-			sendMessage("QUIT");
+			sendMessage(Message.MESSAGE_TYPE.MESSAGE,"QUIT");
 			
 			/** Closes the connection **/
 			in.close();
