@@ -12,10 +12,10 @@ public class Key {
 	private BigInteger first;
     private BigInteger second;
 
-    public Key(BigInteger p, BigInteger q) {
-		this.first = p;
-        this.second = q;
-	}
+    public Key(BigInteger n, BigInteger e) {
+		this.first = n;
+        this.second = e;
+    }
 	
 	public BigInteger first() {
         return this.first;
@@ -25,7 +25,7 @@ public class Key {
     }
 
     public String toString() {
-		return "(" + this.first + "," + this.second + ")" + "\n";
+		return "" + this.first + "," + this.second + "";
     } 
     
     /**

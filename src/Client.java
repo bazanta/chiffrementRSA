@@ -24,8 +24,10 @@ public class Client extends Thread
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	private Socket socket;
+
 	private int port;
 	private int client_name;
+
 	private Keys porteCle;
 	private Key hostKey;
 
@@ -36,13 +38,14 @@ public class Client extends Thread
 	 */
 	public Client(int p) 
 	{
-		socket = null;
-		out = null;
-		in = null;
-		port = p;
-		client_name = ++number_of_clients;
-		porteCle = new Keys();
-		hostKey = null;
+		this.socket = null;
+		this.out = null;
+		this.in = null;
+		this.port = p;
+		this.client_name = ++number_of_clients;
+
+		this.porteCle = new Keys();
+		this.hostKey = null;
 	}
 	
 	/**
@@ -56,9 +59,9 @@ public class Client extends Thread
 		socket = new Socket("localhost", port);
 		out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		out.flush();
-		in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));		
-		sendMessage(Message.MESSAGE_TYPE.MESSAGE,"NAME CLIENT-" + client_name);
+		in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 		sendMessage(Message.MESSAGE_TYPE.KEY, porteCle.getKeyPublic());
+		System.out.println("Key send");
 	}
 
 	/**
@@ -68,10 +71,12 @@ public class Client extends Thread
 	 */
 	private void sendMessage(Message.MESSAGE_TYPE type , Object o) throws IOException 
 	{
+		System.out.println("Send message : "+o.toString());
 		Message msg = new Message(type,o.toString());
 		if (type == Message.MESSAGE_TYPE.MESSAGE && hostKey != null){
 			msg.encryptMess(hostKey);
 		}
+		System.out.println("Send message encrypt : "+msg.getMessage());
 		out.writeObject(msg);
 		out.flush();
 	}
@@ -85,21 +90,47 @@ public class Client extends Thread
 			connect(port);
 			Scanner sc = new Scanner(System.in);
 			Message message;
+			String msg = "";
+			String oldMsg = "";
+			boolean kill = false;
 			/** Gets the Server input **/
-			while (!(message = (Message) in.readObject()).equals("QUIT")) {
-				if (message.decryptMess(hostKey).equals("WAIT")) {
-					/** Wait for the server's instruction **/
-				} else if (message.decryptMess(hostKey).equals("CONNECTED")) {
-					System.out.println("CLIENT \tCONNECTED");
-					//sendMessage(Message.MESSAGE_TYPE.MESSAGE,"QUIT");
-				} else if (message.getType() == Message.MESSAGE_TYPE.KEY) {
-					String string = message.getMessage();
-					String[] hStrings = string.split(",");
-					hostKey = new Key(new BigInteger(hStrings[0]),new BigInteger(hStrings[1]));
+			System.out.println("NON KILL");
+			while (!kill) {	
+				System.out.println("Lecture reponse serveur");			
+				message = (Message) in.readObject();
+				if (message.getType() == Message.MESSAGE_TYPE.KEY) {
+					msg = message.getMessage();
+					System.out.println(msg);
+					String[] hStrings = msg.split(",");
+					if (hStrings.length == 2) {
+						hostKey = new Key(new BigInteger(hStrings[0]),new BigInteger(hStrings[1]));
+						sendMessage(Message.MESSAGE_TYPE.MESSAGE, "OK");
+					} else {
+						sendMessage(Message.MESSAGE_TYPE.MESSAGE, "NO_KEY");
+					}
 				} else {
-					sendMessage(Message.MESSAGE_TYPE.MESSAGE,sc.nextLine());
+					if (hostKey != null) {
+						message.decryptMess(porteCle.getKeyPrivate());
+						msg = message.getMessage();
+						System.out.println(msg);
+						if (msg.equals("QUIT")) {
+							kill = true;
+						} else if (msg.equals(oldMsg)) {
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "OK");	
+						} else if (msg.equals("NEXT")) {
+							oldMsg = sc.nextLine();
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, oldMsg);							
+						}
+					} else if (message.getMessage().equals("NO_KEY")) {
+						System.out.println("NO_KEY resend");
+						sendMessage(Message.MESSAGE_TYPE.KEY, porteCle.getKeyPublic());
+					} else {
+						System.out.println("NO_KEY ask new");
+						sendMessage(Message.MESSAGE_TYPE.MESSAGE, "NO_KEY");
+					}
 				}
 			}
+			System.out.println("KILL");
 			System.out.println("CLIENT " + client_name + "\tQUIT");
 			sendMessage(Message.MESSAGE_TYPE.MESSAGE,"QUIT");
 			
@@ -117,8 +148,8 @@ public class Client extends Thread
 	 */
 	public static void main(String[] args) 
 	{
-		Client server = new Client(20000);
-		server.start();
+		Client cli = new Client(20000);
+		cli.start();
 	}
 
 }

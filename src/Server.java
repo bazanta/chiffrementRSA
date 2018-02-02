@@ -15,6 +15,7 @@ public class Server extends Thread
 	 * Class variables
 	 */
 	private int port;
+	private Keys porteCle;
 	
 	/**
 	 * Constructs a Server with the port given in parameters
@@ -22,7 +23,7 @@ public class Server extends Thread
 	 */
 	public Server(int p) 
 	{
-		port = p;
+		this.port = p;
 	}
 	
 	/**
@@ -33,6 +34,7 @@ public class Server extends Thread
 		/**
 			Création des clés
 		 */
+		porteCle = new Keys();
 		
 		try {
 			/** Creates a ServerSocket to accepts the Clients **/
@@ -42,7 +44,7 @@ public class Server extends Thread
 			while (true) {
 				Socket socket = server.accept();
 				
-				ServerToClient server_to_client = new ServerToClient(socket);
+				ServerToClient server_to_client = new ServerToClient(socket,porteCle);
 				server_to_client.start();
 			}
 		} catch (Exception e) {

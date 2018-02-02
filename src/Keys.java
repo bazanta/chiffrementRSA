@@ -144,10 +144,10 @@ public class Keys {
 
 		Message msg = new Message(Message.MESSAGE_TYPE.MESSAGE, "Bravo");
 		System.out.println(msg.getMessage());
-		String msgCrypt = msg.encryptMess(keysVerif.getKeyPublic());
-		System.out.println(msgCrypt);
+		msg.encryptMess(keysVerif.getKeyPublic());
+		System.out.println(msg.getMessage());
 
-		String msgDecrypt = keysVerif.getKeyPrivate().decrypt(msgCrypt);
-		System.out.println(msgDecrypt);
+		msg.decryptMess(keysVerif.getKeyPrivate());
+		System.out.println(msg.getMessage());
 	}
 }

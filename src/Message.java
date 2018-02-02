@@ -7,11 +7,14 @@ import java.math.BigInteger;
 /* MAINFROID Pierre-Olivier */
 /****************************/
 
-public class Message {
+import java.io.Serializable;
+
+public class Message implements Serializable {
 
 	public enum MESSAGE_TYPE {
 		KEY,
-		MESSAGE
+		MESSAGE,
+		PROTOCOL,
 	};
 
 	/**
@@ -39,21 +42,19 @@ public class Message {
 		return this.msg;
 	}
 
-	public String decryptMess(Key key) 
+	public void decryptMess(Key key) 
 	{
         if (this.type == MESSAGE_TYPE.MESSAGE) {
             String msgDecrypt = key.decrypt(this.msg);
-            return msgDecrypt;
-        }		
-        return "";        
+            this.msg = msgDecrypt;
+        }		       
     }
 
-	public String encryptMess(Key key)
+	public void encryptMess(Key key)
 	{
         if (this.type == MESSAGE_TYPE.MESSAGE) {
             String msgEncrypt = key.encrypt(this.msg);
-            return msgEncrypt;
-        }
-        return "";        
+            this.msg = msgEncrypt;
+        }       
 	}
 }
