@@ -57,7 +57,7 @@ public class Client extends Thread
 	 */
 	public void connect(int port, String adr) throws Exception 
 	{
-		System.out.println("CLIENT " + client_name + "\tCONNECT TO " + port);
+		System.out.println("ALICE " + client_name + "\tCONNECT TO " + port + " ON " + adr);
 		socket = new Socket(adr, port);
 		out = new ObjectOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 		out.flush();
@@ -73,12 +73,12 @@ public class Client extends Thread
 	private void sendMessage(Message.MESSAGE_TYPE type , Object o) throws IOException 
 	{
 		System.out.println("");
-		System.out.println("Send message : "+o.toString());
+		System.out.println("Send message to BOB : "+o.toString());
 		Message msg = new Message(type,o.toString());
 		if (type == Message.MESSAGE_TYPE.MESSAGE && hostKey != null){
 			msg.encryptMess(hostKey);
 		}
-		System.out.println("Send message encrypt : "+msg.getMessage());
+		System.out.println("Send message encrypt to BOB : "+msg.getMessage());
 		System.out.println("");
 		out.writeObject(msg);
 		out.flush();
@@ -96,13 +96,15 @@ public class Client extends Thread
 			String msg = "";
 			String oldMsg = "";
 			boolean kill = false;
+			boolean lastKey = false;
 			/** Gets the Server input **/
-			while (!kill) {	
-				System.out.println("Lecture reponse serveur");			
+			while (!kill) {			
 				message = (Message) in.readObject();
+				System.out.println("Lecture reponse BOB crypté : " + message.getMessage());
 				if (message.getType() == Message.MESSAGE_TYPE.KEY) {
 					msg = message.getMessage();
-					System.out.println(msg);
+					lastKey = true;
+					System.out.println("Lecture reponse BOB : " + msg);
 					System.out.println("");
 					String[] hStrings = msg.split(",");
 					if (hStrings.length == 2) {
@@ -115,15 +117,20 @@ public class Client extends Thread
 					if (hostKey != null) {
 						message.decryptMess(porteCle.getKeyPrivate());
 						msg = message.getMessage();
-						System.out.println(msg);
+						System.out.println("Lecture reponse BOB : " + msg);
 						System.out.println("");
 						if (msg.equals("QUIT")) {
 							kill = true;
 						} else if (msg.equals(oldMsg)) {
-							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "OK");	
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "TEXTE CORRECT");	
 						} else if (msg.equals("NEXT")) {
 							oldMsg = sc.nextLine();
-							sendMessage(Message.MESSAGE_TYPE.MESSAGE, oldMsg);							
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, oldMsg);	
+						} else if (msg.equals("RECONNEXION")) {
+							System.out.println("ERREUR CRYPTAGE, RECONNEXION NECESSAIRE");
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "QUIT");								
+						} else if (!lastKey) {
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "INCORRECTE");							
 						}
 					} else if (message.getMessage().equals("NO_KEY")) {
 						System.out.println("NO_KEY resend");
@@ -132,10 +139,10 @@ public class Client extends Thread
 						System.out.println("NO_KEY ask new");
 						sendMessage(Message.MESSAGE_TYPE.MESSAGE, "NO_KEY");
 					}
+					lastKey = false;
 				}
 			}
 			System.out.println("CLIENT " + client_name + "\tQUIT");
-			sendMessage(Message.MESSAGE_TYPE.MESSAGE,"QUIT");
 			
 			/** Closes the connection **/
 			in.close();

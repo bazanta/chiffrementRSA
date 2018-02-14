@@ -38,6 +38,8 @@ public class ServerToClient extends Thread
 		this.client_name = "";
 		this.porteCle = keys;
 		this.clientKey = null;
+		System.out.println("Alice vient de se connecter.");
+		System.out.println();
 	}
 	
 	/**
@@ -57,12 +59,13 @@ public class ServerToClient extends Thread
 			Message message;
 			String msg = "";
 			boolean kill = false;
-			while (!kill) {	
-				System.out.println("Lecture reponse client");			
+			while (!kill) {			
 				message = (Message) in.readObject();
+				System.out.println("Lecture reponse Alice crypté : " + message.getMessage());	
 				if (message.getType() == Message.MESSAGE_TYPE.KEY) {
 					msg = message.getMessage();
-					System.out.println(msg);
+					System.out.println("Lecture reponse Alice : " + msg);
+					System.out.println();
 					String[] hStrings = msg.split(",");
 					if (hStrings.length == 2) {
 						clientKey = new Key(new BigInteger(hStrings[0]), new BigInteger(hStrings[1]));
@@ -73,12 +76,14 @@ public class ServerToClient extends Thread
 					if (clientKey != null) {
 						message.decryptMess(porteCle.getKeyPrivate());
 						msg = message.getMessage();
-						System.out.println(msg);
+						System.out.println("Lecture reponse Alice : " + msg);
 						System.out.println("");
 						if (msg.equals("QUIT")) {
 							kill = true;
-						} else if (msg.equals("OK")) {
-							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "NEXT");			
+						} else if (msg.equals("TEXTE CORRECT")||msg.equals("OK")) {
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "NEXT");	
+						} else if (msg.equals("INCORRECT")) {
+							sendMessage(Message.MESSAGE_TYPE.MESSAGE, "RECONNEXION");			
 						} else {								
 							sendMessage(Message.MESSAGE_TYPE.MESSAGE, msg);						
 						}
@@ -111,12 +116,12 @@ public class ServerToClient extends Thread
 	private void sendMessage(Message.MESSAGE_TYPE type , Object o) throws IOException 
 	{
 		System.out.println("");
-		System.out.println("Send message : "+o.toString());
+		System.out.println("Send message to Alice : "+o.toString());
 		Message msg = new Message(type,o.toString());
 		if (type == Message.MESSAGE_TYPE.MESSAGE && clientKey != null){
 			msg.encryptMess(clientKey);
 		}
-		System.out.println("Send message encrypt : "+msg.getMessage());
+		System.out.println("Send message encrypt to Alice : "+msg.getMessage());
 		System.out.println("");
 		out.writeObject(msg);
 		out.flush();
