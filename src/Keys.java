@@ -9,17 +9,18 @@ import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.Random;
 
-public class Keys {
-
+public class Keys 
+{
 	final static int TAILLE_NOMBRE = 2048;
+
 	/**
-	 * Class variables
+	 * Variables
 	 */
 	private Key key_public;
 	private Key key_private;
 
 	/**
-	 * Constructeur clés public private
+	 * Constructeur clés public et private
 	 */
 	public Keys() 
 	{

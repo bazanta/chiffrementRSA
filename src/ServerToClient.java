@@ -74,6 +74,7 @@ public class ServerToClient extends Thread
 						message.decryptMess(porteCle.getKeyPrivate());
 						msg = message.getMessage();
 						System.out.println(msg);
+						System.out.println("");
 						if (msg.equals("QUIT")) {
 							kill = true;
 						} else if (msg.equals("OK")) {
@@ -109,12 +110,14 @@ public class ServerToClient extends Thread
 	 */
 	private void sendMessage(Message.MESSAGE_TYPE type , Object o) throws IOException 
 	{
+		System.out.println("");
 		System.out.println("Send message : "+o.toString());
 		Message msg = new Message(type,o.toString());
 		if (type == Message.MESSAGE_TYPE.MESSAGE && clientKey != null){
 			msg.encryptMess(clientKey);
 		}
 		System.out.println("Send message encrypt : "+msg.getMessage());
+		System.out.println("");
 		out.writeObject(msg);
 		out.flush();
 	}
